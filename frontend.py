@@ -19,19 +19,17 @@ try:
 
     # make data flat
     players_summary_flat = backend.make_data_flat(players_summary)
-    players_stats_flat = backend.make_data_flat(players_stats)
-    players_position_flat = backend.make_data_flat(players_position)
 
-    # Create Dataframes
+    # Create Dataframe
     players_summary_df = pd.DataFrame(players_summary_flat)
-    players_stats_df = pd.DataFrame(players_stats_flat)
-    players_position_df = pd.DataFrame(players_position_flat)
+
 
 except Exception as e:
     st.write("No data found!")
+    players_summary, players_stats, players_position = ([],[],[])
     players_summary_df = pd.DataFrame()
-    players_stats_df = pd.DataFrame()
-    players_position_df = pd.DataFrame()
+
+
 
 # Display the structured dataframe
 st.header(f"Player Details for Year: {year}, Round:{round_number}")
@@ -56,15 +54,21 @@ with col2:
 if stats_clicked:
     st.header("Players Stats")
     try:
+        players_stats_flat = backend.make_data_flat(players_stats)
+        players_stats_df = pd.DataFrame(players_stats_flat)
         st.dataframe(players_stats_df, use_container_width=True)
     except Exception as e:
         st.write("No Data found!")
+        players_stats_df = pd.DataFrame()
         st.dataframe(players_stats_df, use_container_width=True)
 
 if position_clicked:
     st.header("Players Position")
     try:
+        players_position_flat = backend.make_data_flat(players_position)
+        players_position_df = pd.DataFrame(players_position_flat)
         st.dataframe(players_position_df, use_container_width=True)
     except Exception as e:
         st.write("No data found!")
+        players_position_df = pd.DataFrame()
         st.dataframe(players_position_df, use_container_width=True)
