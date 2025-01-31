@@ -11,14 +11,26 @@ headers = {
 }
 
 
-# Function to get data from the API based on year and round returning summary, stats and positions as json
+# Function to get data from the API based on year and round returning summary, stats and positions as JSON
 def get_players_data(year, rnd):
     url = f"https://www.supercoach.com.au/{year}/api/nrl/classic/v1/players-cf?embed=notes%2Codds%2Cplayer_stats%2Cpositions&round={rnd}"
-    response = requests.get(url, headers=headers)
 
-    summary = response.json()
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
 
-    #  Lists for storing stats and positions
+        try:
+            summary = response.json()
+        except ValueError:
+            print("Error: Failed to decode JSON response.")
+            return [], [], []
+
+    # Return empty lists on request failure
+    except requests.exceptions.RequestException as e:
+        print(f"API request failed: {e}")
+        return [], [], []
+
+    # Lists for storing stats and positions
     stats = []
     positions = []
 
@@ -28,15 +40,18 @@ def get_players_data(year, rnd):
         player_position = player.pop("positions", None)
 
         # Beautify the data
-        player_full_name = player["first_name"] + " " + player["last_name"]
-        player_stats[0].pop("player_id")
+        first_name = player.get("first_name", "")
+        last_name = player.get("last_name", "")
+        player_full_name = f"{first_name} {last_name}".strip()
 
-        if player_stats:
-            player_stats = {"player_id": player["id"],"player_full_name": player_full_name, **player_stats[0]}
-            stats.append(player_stats)
-        if player_position:
-            player_position = {"player_id": player["id"],"player_full_name": player_full_name, **player_position[0]}
-            positions.append(player_position)
+        # Check if stats and positions exist and are in the expected format
+        if player_stats and isinstance(player_stats, list) and len(player_stats) > 0:
+            player_stats[0].pop("player_id", None)  # Safe pop operation
+            stats.append({"player_id": player.get("id"), "player_full_name": player_full_name, **player_stats[0]})
+
+        if player_position and isinstance(player_position, list) and len(player_position) > 0:
+            positions.append(
+                {"player_id": player.get("id"), "player_full_name": player_full_name, **player_position[0]})
 
     return summary, stats, positions
 
@@ -57,6 +72,7 @@ def make_data_flat(json_data):
 
     return flat_data
 
+# Assists the make_data_flat function by handling dictionary values
 def handle_dictionary(dict_key, dict_value, player_details):
     for name, detail in dict_value.items():
         new_name = f"{dict_key}_{name}"
@@ -65,6 +81,7 @@ def handle_dictionary(dict_key, dict_value, player_details):
         else:
             player_details[new_name] = detail
 
+# Assists the make_data_flat function by handling list values
 def handle_list(list_key, list_value, player_details):
     try:
         new_dict = list_value[0]

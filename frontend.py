@@ -10,7 +10,9 @@ st.title("Super Coach Players Stats")
 # Get user inputs for year and round
 st.header("Select Year and Round")
 year = st.number_input("Enter Year", min_value=2024, max_value=2030, value=2024, step=1)
-round_number = st.number_input("Enter Round", min_value=0, max_value=30, value=0, step=1)
+round_number = st.number_input("Enter Round", min_value=0, max_value=27, value=0, step=1)
+
+players_summary, players_stats, players_position = ([],[],[])
 
 # Try fetching data and handle potential exceptions
 try:
@@ -23,10 +25,8 @@ try:
     # Create Dataframe
     players_summary_df = pd.DataFrame(players_summary_flat)
 
-
 except Exception as e:
     st.write("No data found!")
-    players_summary, players_stats, players_position = ([],[],[])
     players_summary_df = pd.DataFrame()
 
 
