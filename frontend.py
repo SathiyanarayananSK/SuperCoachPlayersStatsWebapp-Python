@@ -3,14 +3,15 @@ import streamlit as st
 import pandas as pd
 import backend
 
+st.set_page_config(layout="wide", page_title="SuperCoach NRL Stats")
 
 # Display the title of the app
 st.title("Super Coach Players Stats")
 
 # Get user inputs for year and round
-st.header("Select Year and Round")
-year = st.number_input("Enter Year", min_value=2024, max_value=2030, value=2024, step=1)
-round_number = st.number_input("Enter Round", min_value=0, max_value=27, value=0, step=1)
+st.sidebar.title("Select Year and Round")
+year = st.sidebar.number_input("Enter Year", min_value=2024, max_value=2030, value=2024, step=1)
+round_number = st.sidebar.number_input("Enter Round", min_value=0, max_value=27, value=0, step=1)
 
 players_summary, players_stats, players_position = ([],[],[])
 
@@ -32,23 +33,26 @@ except Exception as e:
 
 
 # Display the structured dataframe
-st.header(f"Player Details for Year: {year}, Round:{round_number}")
+st.header(f"Player Details for Year: {year} and Round:{round_number}")
 st.dataframe(players_summary_df, use_container_width=True)
 
-# Create two columns for the Stats and Position buttons
-col1, col2 = st.columns([0.5, 2.5])
+st.sidebar.title("Players Stats and Positions")
 
-# Track which button was clicked
-stats_clicked = False
-position_clicked = False
+with st.sidebar:
+    # Create two columns for the Stats and Position buttons
+    col1, col2 = st.columns([1, 1])
 
-with col1:
-    if st.button('Players stats'):
-        stats_clicked = True
+    # Track which button was clicked
+    stats_clicked = False
+    position_clicked = False
 
-with col2:
-    if st.button('Players position'):
-        position_clicked = True
+    with col1:
+        if st.button('Players stats'):
+            stats_clicked = True
+
+    with col2:
+        if st.button('Players position'):
+            position_clicked = True
 
 # Display data based on button clicks
 if stats_clicked:
