@@ -109,7 +109,7 @@ if __name__ == "__main__":
     # Sidebar for filtering stats
     st.sidebar.subheader("Search Player Details")
     search_id = st.sidebar.number_input(
-        "By Id", min_value=1, value=st.session_state.search_id or 1, key="search_id", on_change=reset_search_name
+        "By Id", min_value=1, value=st.session_state.search_id, key="search_id", on_change=reset_search_name
     )
 
     search_name = st.sidebar.text_input(
