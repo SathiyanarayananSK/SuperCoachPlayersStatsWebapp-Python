@@ -48,11 +48,11 @@ def get_players_data(year, rnd):
         # Check if stats and positions exist and are in the expected format
         if player_stats and isinstance(player_stats, list) and len(player_stats) > 0:
             player_stats[0].pop("player_id", None)  # Safe pop operation
-            stats.append({"player_id": player.get("id"), "player_full_name": player_full_name, **player_stats[0]})
+            stats.append({"id": player.get("id"), "player_full_name": player_full_name, **player_stats[0]})
 
         if player_position and isinstance(player_position, list) and len(player_position) > 0:
             positions.append(
-                {"player_id": player.get("id"), "player_full_name": player_full_name, **player_position[0]})
+                {"id": player.get("id"), "player_full_name": player_full_name, **player_position[0]})
 
     return summary, stats, positions
 
@@ -90,15 +90,32 @@ def handle_list(list_key, list_value, player_details):
     except IndexError:
         player_details[list_key] = list_value
 
-def filter_json_by_id(player_id, players_json):
+def filter_json_by_search_term(player_term, players_json):
     result = []
-    for player in players_json:
-        if player["player_id"] == player_id:
-            result.append(player)
 
-    return result
+    if isinstance(player_term, int):  # Check if player_term is an int
+        player_id = player_term
+        for player in players_json:
+            if player["id"] == player_id:
+                result.append(player)
+        return result
 
+    elif isinstance(player_term, str):  # Check if player_term is a string
+        player_name = player_term
+        for player in players_json:
+            if "first_name" in player and "last_name" in player:
+                full_name = f"{player['first_name']} {player['last_name']}"
+            elif "player_full_name" in player:
+                full_name = player["player_full_name"]
+            else:
+                full_name = ""
 
+            if player_name.lower() in full_name.lower():
+                result.append(player)
+        return result
+
+    else:
+        return []
 
 
 

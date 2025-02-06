@@ -8,7 +8,6 @@ def fetch_data(entered_year, entered_round):
     st.header(f"Players Details for Year: {entered_year} and Round: {entered_round}")
     # Get players data from the API for the input year and round
     summary, stats, position = backend.get_players_data(year=entered_year, rnd=entered_round)
-
     return summary, stats, position
 
 def display_summary(summary_json):
@@ -41,6 +40,18 @@ def display_position(position_json):
         players_position_df = pd.DataFrame(players_position_flat)
         st.dataframe(players_position_df, use_container_width=True)
 
+def display_filtered_details(player_id, summary, stats, position):
+    # Filter Details based on search ID
+    filtered_summary = backend.filter_json_by_search_term(player_id, summary)
+    filtered_stats = backend.filter_json_by_search_term(player_id, stats)
+    filtered_position = backend.filter_json_by_search_term(player_id, position)
+    st.subheader("Summary")
+    display_summary(filtered_summary)
+    st.subheader("Stats")
+    display_stats(filtered_stats)
+    st.subheader("Position")
+    display_position(filtered_position)
+
 
 if __name__ == "__main__":
     # Set config values
@@ -60,10 +71,10 @@ if __name__ == "__main__":
     # Display Players Summary
     display_summary(players_summary)
 
-    # Create Players Stats and Position buttons in sidebar
     st.sidebar.title("Players Stats and Positions")
 
     with st.sidebar:
+        st.sidebar.subheader("Get all")
         # Create two columns for the Stats and Position buttons
         col1, col2 = st.columns([1, 1])
 
@@ -74,32 +85,56 @@ if __name__ == "__main__":
         with col1:
             if st.button('Players stats'):
                 stats_clicked = True
+                position_clicked = False
 
         with col2:
             if st.button('Players position'):
                 position_clicked = True
+                stats_clicked = False
 
+    # Initialize session state for search values
     if "search_id" not in st.session_state:
         st.session_state.search_id = None
 
-    # Display data based on button clicks
-    if stats_clicked:
-        st.header(f"Players Stats for Year: {year} and Round:{round_number}")
-        display_stats(players_stats)
-        st.sidebar.write("Search Player Stats")
-        search_id = st.sidebar.number_input("By Id", min_value=1, value=st.session_state.search_id, key="search_id")
-        search_name = st.sidebar.text_input("By Name")
-        filtered_stats = backend.filter_json_by_id(search_id, players_stats)
-        display_stats(filtered_stats)
+    if "search_name" not in st.session_state:
+        st.session_state.search_name = None
 
-    if position_clicked:
-        st.header(f"Players Position for Year: {year} and Round:{round_number}")
+    # Callbacks to reset the other field when one is used
+    def reset_search_id():
+        st.session_state.search_id = None
+
+    def reset_search_name():
+        st.session_state.search_name = None
+
+    # Sidebar for filtering stats
+    st.sidebar.subheader("Search Player Details")
+    search_id = st.sidebar.number_input(
+        "By Id", min_value=1, value=st.session_state.search_id or 1, key="search_id", on_change=reset_search_name
+    )
+
+    search_name = st.sidebar.text_input(
+        "By Name", value=st.session_state.search_name or "", key="search_name", on_change=reset_search_id
+    )
+
+    # Create an empty container that will hold the displayed content
+    content_placeholder = st.empty()
+
+    # Display content based on search term or button click
+    if st.session_state.search_id and not stats_clicked and not position_clicked:
+        content_placeholder.header(f"Player details for Year: {year}, Round: {round_number}")
+        display_filtered_details(st.session_state.search_id, players_summary, players_stats, players_position)
+
+    elif st.session_state.search_name and not stats_clicked and not position_clicked:
+        content_placeholder.header(f"Player details for Year: {year}, Round: {round_number}")
+        display_filtered_details(st.session_state.search_name, players_summary, players_stats, players_position)
+
+    elif stats_clicked:
+        content_placeholder.header(f"Players Stats for Year: {year} and Round:{round_number}")
+        display_stats(players_stats)
+
+    elif position_clicked:
+        content_placeholder.header(f"Players Position for Year: {year} and Round:{round_number}")
         display_position(players_position)
 
-    # if stats_clicked or position_clicked:
-    #     st.sidebar.write("Search Player Stats and Position")
-    #     search_id = st.sidebar.number_input("By Id", min_value=1)
-    #     search_name = st.sidebar.text_input("By Name")
-    #     filtered_stats = backend.filter_json_by_id(search_id, players_stats)
-    #     filtered_positions = backend.filter_json_by_id(search_id, players_position)
-    #     #filtered_position = backend.filter_json_by_name()
+    else:
+        content_placeholder.empty()
