@@ -2,6 +2,7 @@
 import streamlit as st
 import pandas as pd
 import backend
+from send_email import send_email
 
 
 def fetch_data(entered_year, entered_round):
@@ -51,6 +52,12 @@ def display_filtered_details(player_id, summary, stats, position):
     display_stats(filtered_stats)
     st.subheader("Position")
     display_position(filtered_position)
+
+def draft_and_send_feedback(message):
+    body = "subject: SuperCoach Feedback \n\n"
+    body += message
+    body = body.encode("utf-8")
+    send_email(body)
 
 
 if __name__ == "__main__":
@@ -119,6 +126,12 @@ if __name__ == "__main__":
     # Create an empty container that will hold the displayed content
     content_placeholder = st.empty()
 
+    st.sidebar.header("Feedback")
+    feedback = st.sidebar.text_area("Share your thoughts:", "")
+    if st.sidebar.button("Submit Feedback"):
+        draft_and_send_feedback(feedback)
+        st.success("Thank you for your feedback! Feedback sent successfully!")
+
     # Display content based on search term or button click
     if st.session_state.search_id and not stats_clicked and not position_clicked:
         content_placeholder.header(f"Player details for Year: {year}, Round: {round_number}")
@@ -138,3 +151,5 @@ if __name__ == "__main__":
 
     else:
         content_placeholder.empty()
+
+
