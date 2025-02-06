@@ -44,6 +44,7 @@ def get_players_data(year, rnd):
         last_name = player.get("last_name", "")
         player_full_name = f"{first_name} {last_name}".strip()
 
+
         # Check if stats and positions exist and are in the expected format
         if player_stats and isinstance(player_stats, list) and len(player_stats) > 0:
             player_stats[0].pop("player_id", None)  # Safe pop operation
@@ -88,6 +89,17 @@ def handle_list(list_key, list_value, player_details):
         handle_dictionary(list_key, new_dict, player_details)
     except IndexError:
         player_details[list_key] = list_value
+
+def filter_json_by_id(player_id, players_json):
+    result = []
+    for player in players_json:
+        if player["player_id"] == player_id:
+            result.append(player)
+
+    return result
+
+
+
 
 
 if __name__ == "__main__":
