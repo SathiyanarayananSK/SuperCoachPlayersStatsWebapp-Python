@@ -1,6 +1,5 @@
 import requests
 
-
 # Default header to imitate browser
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -47,12 +46,16 @@ def get_players_data(year, rnd):
 
         # Check if stats and positions exist and are in the expected format
         if player_stats and isinstance(player_stats, list) and len(player_stats) > 0:
-            player_stats[0].pop("player_id", None)  # Safe pop operation
+            player_stats[0].pop("player_id", None)
             stats.append({"id": player.get("id"), "player_full_name": player_full_name, **player_stats[0]})
 
         if player_position and isinstance(player_position, list) and len(player_position) > 0:
             positions.append(
                 {"id": player.get("id"), "player_full_name": player_full_name, **player_position[0]})
+
+    if len(stats)>0 and "round" in stats[0]:
+        if stats[0]["round"] != rnd:
+            return [], [], []
 
     return summary, stats, positions
 

@@ -1,4 +1,4 @@
-import smtplib, ssl
+import smtplib, ssl, os
 import streamlit as st
 
 def send_email(user_input):
@@ -8,13 +8,15 @@ def send_email(user_input):
 
     # Email credentials
     username = "ssk98.automations@gmail.com"
-    password = st.secrets["EmailsAppPassword"]  # Fetch password from environment variables
-
+    #password = st.secrets["EmailsAppPassword"]  # Fetch password from environment variables
+    password = os.getenv("PortfolioEmailsAppPassword")
     receiver = "sathiyanarayanan.au@gmail.com"  # Receiver email address
 
     context = ssl.create_default_context()  # SSL context for secure connection
 
-    message = user_input  # Email content
+    message = f"From: SuperCoach Stats App\n"
+    message += "Subject: Feedback Received\n\n"
+    message += user_input
 
     # Send the email using SMTP_SSL
     with smtplib.SMTP_SSL(host, port, context=context) as server:

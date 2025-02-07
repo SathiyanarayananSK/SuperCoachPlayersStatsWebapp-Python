@@ -11,7 +11,7 @@ mock_api_responses = {
             "id": 1,
             "first_name": "Jesse",
             "last_name": "Arthars",
-            "player_stats": [{"round": 10, "points": 0, "position": 159}],
+            "player_stats": [{"round": 0, "points": 0, "position": 159}],
             "positions": [{"position": "CTW", "position_long": "Wing/Centre"}]
         }
     ],
@@ -47,7 +47,7 @@ mock_api_responses = {
 mock_api_responses_copy = copy.deepcopy(mock_api_responses)
 
 
-# Step 1: Mock the API response and test the data flow
+# Mock the API response and test the data flow
 @pytest.mark.parametrize("entered_year, entered_round", [
     (2025, 0),
     (2024, 5),

@@ -4,13 +4,14 @@ import pandas as pd
 import backend
 from send_email import send_email
 
-
+# Fetch data from backend with year and round number as input
 def fetch_data(entered_year, entered_round):
     st.header(f"Players Details for Year: {entered_year} and Round: {entered_round}")
     # Get players data from the API for the input year and round
     summary, stats, position = backend.get_players_data(year=entered_year, rnd=entered_round)
     return summary, stats, position
 
+# Display the summary
 def display_summary(summary_json):
     if len(summary_json) == 0:
         st.write("No Data Found! Try different values.")
@@ -21,6 +22,7 @@ def display_summary(summary_json):
         players_summary_df = pd.DataFrame(players_summary_flat)
         st.dataframe(players_summary_df, use_container_width=True)
 
+# Display Player stats
 def display_stats(stats_json):
     if len(stats_json) == 0:
         st.write("No Data Found! Try different values.")
@@ -31,6 +33,7 @@ def display_stats(stats_json):
         players_stats_df = pd.DataFrame(players_stats_flat)
         st.dataframe(players_stats_df, use_container_width=True)
 
+# Display players position
 def display_position(position_json):
     if len(position_json) == 0:
         st.write("No Data Found! Try different values.")
@@ -41,11 +44,12 @@ def display_position(position_json):
         players_position_df = pd.DataFrame(players_position_flat)
         st.dataframe(players_position_df, use_container_width=True)
 
-def display_filtered_details(player_id, summary, stats, position):
+# Filter players json based on user input and display the content
+def display_filtered_details(player_term, summary, stats, position):
     # Filter Details based on search ID
-    filtered_summary = backend.filter_json_by_search_term(player_id, summary)
-    filtered_stats = backend.filter_json_by_search_term(player_id, stats)
-    filtered_position = backend.filter_json_by_search_term(player_id, position)
+    filtered_summary = backend.filter_json_by_search_term(player_term, summary)
+    filtered_stats = backend.filter_json_by_search_term(player_term, stats)
+    filtered_position = backend.filter_json_by_search_term(player_term, position)
     st.subheader("Summary")
     display_summary(filtered_summary)
     st.subheader("Stats")
@@ -54,12 +58,10 @@ def display_filtered_details(player_id, summary, stats, position):
     display_position(filtered_position)
 
 def draft_and_send_feedback(message):
-    body = "subject: SuperCoach Feedback \n\n"
-    body += message
-    body = body.encode("utf-8")
-    send_email(body)
+    message.encode("utf-8")
+    send_email(message)
 
-
+# Main Program
 if __name__ == "__main__":
     # Set config values
     st.set_page_config(layout="wide", page_title="SuperCoach NRL Stats")
@@ -78,6 +80,7 @@ if __name__ == "__main__":
     # Display Players Summary
     display_summary(players_summary)
 
+    # Create Sidebar elements
     st.sidebar.title("Players Stats and Positions")
 
     with st.sidebar:
@@ -116,21 +119,22 @@ if __name__ == "__main__":
     # Sidebar for filtering stats
     st.sidebar.subheader("Search Player Details")
     search_id = st.sidebar.number_input(
-        "By Id", min_value=1, value=st.session_state.search_id, key="search_id", on_change=reset_search_name
+        "By Id",
+        min_value=1,
+        value=st.session_state.get("search_id", 1),  # Use session state value if available
+        key="search_id",
+        on_change=reset_search_name,
     )
 
     search_name = st.sidebar.text_input(
-        "By Name", value=st.session_state.search_name or "", key="search_name", on_change=reset_search_id
+        "By Name",
+        value=st.session_state.get("search_name", ""),  # Use session state value if available
+        key="search_name",
+        on_change=reset_search_id,
     )
 
     # Create an empty container that will hold the displayed content
     content_placeholder = st.empty()
-
-    st.sidebar.header("Feedback")
-    feedback = st.sidebar.text_area("Share your thoughts:", "")
-    if st.sidebar.button("Submit Feedback"):
-        draft_and_send_feedback(feedback)
-        st.success("Thank you for your feedback! Feedback sent successfully!")
 
     # Display content based on search term or button click
     if st.session_state.search_id and not stats_clicked and not position_clicked:
@@ -152,4 +156,10 @@ if __name__ == "__main__":
     else:
         content_placeholder.empty()
 
+    # Get Feedback and send it
+    st.sidebar.header("Feedback")
+    feedback = st.sidebar.text_area("Share your thoughts:", "")
 
+    if st.sidebar.button("Submit Feedback"):
+        draft_and_send_feedback(feedback)
+        st.success("Thank you for your Feedback! Feedback sent successfully!")
