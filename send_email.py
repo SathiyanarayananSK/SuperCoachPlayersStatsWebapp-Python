@@ -8,8 +8,8 @@ def send_email(user_input):
 
     # Email credentials
     username = "ssk98.automations@gmail.com"
-    #password = st.secrets["EmailsAppPassword"]  # Fetch password from environment variables
-    password = os.getenv("PortfolioEmailsAppPassword")
+    password = st.secrets["EmailsAppPassword"]  # Fetch password from environment variables
+    #password = os.getenv("PortfolioEmailsAppPassword")
     receiver = "sathiyanarayanan.au@gmail.com"  # Receiver email address
 
     context = ssl.create_default_context()  # SSL context for secure connection

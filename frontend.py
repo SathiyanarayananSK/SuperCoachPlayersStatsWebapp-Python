@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import backend
 from send_email import send_email
+import time
 
 # Fetch data from backend with year and round number as input
 def fetch_data(entered_year, entered_round):
@@ -118,20 +119,8 @@ if __name__ == "__main__":
 
     # Sidebar for filtering stats
     st.sidebar.subheader("Search Player Details")
-    search_id = st.sidebar.number_input(
-        "By Id",
-        min_value=1,
-        value=st.session_state.get("search_id", 1),  # Use session state value if available
-        key="search_id",
-        on_change=reset_search_name,
-    )
-
-    search_name = st.sidebar.text_input(
-        "By Name",
-        value=st.session_state.get("search_name", ""),  # Use session state value if available
-        key="search_name",
-        on_change=reset_search_id,
-    )
+    search_id = st.sidebar.number_input("By Id", min_value=1, value=None, key="search_id", on_change=reset_search_name)
+    search_name = st.sidebar.text_input("By Name", value=None, key="search_name", on_change=reset_search_id)
 
     # Create an empty container that will hold the displayed content
     content_placeholder = st.empty()
@@ -158,8 +147,12 @@ if __name__ == "__main__":
 
     # Get Feedback and send it
     st.sidebar.header("Feedback")
-    feedback = st.sidebar.text_area("Share your thoughts:", "")
+    feedback = st.sidebar.text_area("Share your thoughts:", key="feedback_key", value="")
 
     if st.sidebar.button("Submit Feedback"):
         draft_and_send_feedback(feedback)
         st.success("Thank you for your Feedback! Feedback sent successfully!")
+        time.sleep(2)
+        st.rerun()
+
+
