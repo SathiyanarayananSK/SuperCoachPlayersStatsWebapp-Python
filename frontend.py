@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     # Get user inputs for year and round
     st.sidebar.title("Select Year and Round")
-    year = st.sidebar.number_input("Enter Year", min_value=1950, max_value=2030, value=2024, step=1)
+    year = st.sidebar.number_input("Enter Year", min_value=2020, max_value=2030, value=2025, step=1)
     round_number = st.sidebar.number_input("Enter Round", min_value=0, max_value=27, value=0, step=1)
 
     # Fetch data for the entered year and round number
